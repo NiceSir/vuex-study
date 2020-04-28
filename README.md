@@ -38,4 +38,192 @@
 
 ## 操作
 
-* 
+* 创建store文件并 export
+
+        import Vue from 'vue'
+        import Vuex from 'vuex'
+
+         Vue.use(Vuex)
+
+        export default new Vuex.Store({
+         state:{
+            count:1
+         }
+        })
+
+* 导入至main.js中
+
+        import store from './store'
+
+        new Vue({
+         el: '#app',
+         components: { App },
+         store,
+          template: '<App/>'
+        })
+
+* 计算属性中获取状态
+
+       computed: {
+          count(){
+           return this.$store.state.count
+         }
+       }
+
+* ...mapState传递多个状态值
+
+        //组件中
+        import {mapState} from 'vuex'
+
+
+        //写法一
+        computed：{
+            ...mapState({
+                 // 箭头函数可使代码更简练
+                 count: state => state.count,
+
+                 // 传字符串参数 
+              //'count' 等同于 `state =>state.count`
+               countAlias: 'count',
+
+                // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+                   countPlusLocalState (state) {
+                   return state.count + this.localCount
+                }
+            })
+        }
+
+
+
+
+        //写法二
+      computed: mapState({
+        // 箭头函数可使代码更简练
+        count: state => state.count,
+
+         // 传字符串参数 
+         //'count' 等同于 `state => state.count`
+        countAlias: 'count',
+
+          // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+            countPlusLocalState (state) {
+           return state.count + this.localCount
+        }
+       })
+
+* 计算属性getters
+
+    当你需要多个组件运用到计算属性
+
+        getters: {
+            doneTodos: state => {
+             return state.todos.filter(todo => todo.done)
+         }
+        }
+
+        //传入方法
+        //id为传入的数值
+        getTodoById: (state) => (id) => {
+            return state.todos.find(todo => todo.id === id)
+        }
+
+        在组件中的调用
+        computed:{
+            getTodoById(){
+                return this.$store.getters.getTodoById(2)
+            }
+        }
+
+* 提交事件mutations
+
+        //store中
+        mutations:{
+            addNum(state,num){
+               state.count+=num
+          }
+        }
+
+        //component
+        methods:{
+            addNum(){
+              this.$store.commit("addNum",1)
+         }
+        }
+
+* 分发（dispatch）事件Actions
+
+
+        //store中
+        actions: {
+            increment ({ commit }) {
+            commit('increment')
+         }
+        }
+
+        //components
+        methods:{
+
+        // 以载荷形式分发
+        this.$store.dispatch('incrementAsync', {
+            amount: 10
+        })
+
+                // 以对象形式分发
+        store.dispatch({
+             type: 'incrementAsync',
+            amount: 10
+        })
+        }
+
+* 分发（组合拳）
+
+
+        /*
+        * 将Action用promise封装起来
+        * actionB的执行在actionA后面
+        */
+        actions: {
+         actionA ({ commit }) {
+            return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                commit('someMutation')
+             resolve()
+             }, 1000)
+            })
+         }
+
+        actionB ({ dispatch, commit }) {
+            return dispatch('actionA').then(() => {
+             commit('someOtherMutation')
+         })
+         }
+        }
+
+        // 假设 getData() 和 getOtherData() 返回的是 Promise
+
+        actions: {
+            async actionA ({ commit }) {
+              commit('gotData', await getData())
+            },
+             async actionB ({ dispatch, commit }) {
+             await dispatch('actionA') // 等待 actionA 完成
+             commit('gotOtherData', await getOtherData())
+             }
+        }
+
+* 当需要双向绑定state时
+
+        computed: {
+            message: {
+            get () {
+                return this.$store.state.obj.message
+            },
+            set (value) {
+                this.$store.commit('updateMessage', value)
+            }
+         }
+        }
+
+* 热重载
+
+    https://vuex.vuejs.org/zh/guide/hot-reload.html
