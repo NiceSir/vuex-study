@@ -227,3 +227,26 @@
 * 热重载
 
     https://vuex.vuejs.org/zh/guide/hot-reload.html
+
+* 持久化
+
+1. vuex-persistedstate
+
+        //引入
+        npm install vuex-persistedstate  --save
+
+        
+        //配置
+        import createPersistedState from "vuex-persistedstate"
+
+        plugins: [
+            createPersistedState({
+             storage: window.sessionStorage,
+             reducer(val) {
+                 return {
+                 // 只储存state中的user
+                  user: val.user
+             }
+            }
+            })
+        ]
